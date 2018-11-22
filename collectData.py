@@ -75,15 +75,13 @@ if __name__ == '__main__':
       else:
         continue 
       for head in enumerate(meshHeadingList):
-        qualifierNames = head[1]
-        for j in enumerate(qualifierNames[u'QualifierName']):
-          for k in enumerate(j):
-            if (k[0] == 1):
-              # Add mesh term and id to meshDict
-              meshTerm = k[1]
-              meshUniqueID =  meshTerm.__getattribute__("attributes")[u'UI']
-#              meshDict[meshUniqueID] = meshTerm
-              meshDict[meshTerm] = meshUniqueID
+        # Get MeSH unique ID and term
+        meshUniqueID =  head[1][u'DescriptorName'].__getattribute__("attributes")[u'UI']
+        meshTerm = head[1][u'DescriptorName']
+          
+        # Add mesh term and id to meshDict
+#        meshDict[meshUniqueID] = meshTerm
+        meshDict[meshTerm] = meshUniqueID
 
 
       #Append mesh dict to meshList
