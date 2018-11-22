@@ -77,12 +77,10 @@ if __name__ == '__main__':
       for head in enumerate(meshHeadingList):
         # Get MeSH unique ID and term
         meshUniqueID =  head[1][u'DescriptorName'].__getattribute__("attributes")[u'UI']
-        meshTerm = head[1][u'DescriptorName']
+        meshTerm = head[1][u'DescriptorName'].__str__()
           
         # Add mesh term and id to meshDict
-#        meshDict[meshUniqueID] = meshTerm
-        meshDict[meshTerm] = meshUniqueID
-
+        meshDict[meshUniqueID] = meshTerm
 
       #Append mesh dict to meshList
       meshList.append({pmid: meshDict})
