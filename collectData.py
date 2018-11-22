@@ -55,6 +55,8 @@ if __name__ == '__main__':
       pmid = int(str(paper['MedlineCitation']['PMID']))
       article = paper['MedlineCitation']['Article']
 
+      print pmid
+
       # If article doesn't have an abstract, don't process it
       if 'Abstract' not in article:
         continue
@@ -66,16 +68,13 @@ if __name__ == '__main__':
       # Store dictionary of mesh codes for paper
       meshDict = {}
 
-      # Used for output
-      meshString = ""
-      
       # Get mesh codes for paper (if paper contains them)
       if (u'MeshHeadingList' in paper['MedlineCitation'].keys()):
         meshHeadingList = paper['MedlineCitation'][u'MeshHeadingList'] 
       # Otherwise, move on to next paper
       else:
         continue 
-      for  head in enumerate(meshHeadingList):
+      for head in enumerate(meshHeadingList):
         qualifierNames = head[1]
         for j in enumerate(qualifierNames[u'QualifierName']):
           for k in enumerate(j):
@@ -83,15 +82,18 @@ if __name__ == '__main__':
               # Add mesh term and id to meshDict
               meshTerm = k[1]
               meshUniqueID =  meshTerm.__getattribute__("attributes")[u'UI']
+#              meshDict[meshUniqueID] = meshTerm
               meshDict[meshTerm] = meshUniqueID
 
-              # Add mesh term to meshString as well
-              meshString += meshTerm + "\t" 
 
-      #Append  mesh dict to meshList
+      #Append mesh dict to meshList
       meshList.append({pmid: meshDict})
 
-      # Add to output string
+      # Add to mesh codes to output string
+      meshString = ""
+      for code in meshDict.keys():
+        meshString += code + "\t"
+
       outputs.append(meshString + "\n" + abstract)
       
     # Shuffle the list of outputs before writing to files
@@ -105,4 +107,4 @@ if __name__ == '__main__':
     for fileIndex, f in enumerate(files):
       for index, output in enumerate(splitOutputs[fileIndex]):
          text = (''.join(output)).encode('utf-8')
-         f.write(str(index+1) + "\n" + text)
+         f.write(str(index+1) + "\n" + text + "\n\n")
