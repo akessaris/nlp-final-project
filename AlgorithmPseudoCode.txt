@@ -1,0 +1,28 @@
+TF-IDF Method (most standard, no use of hierarchy)
+    
+    One vector for every MeSH code
+    For each abstract in training data:
+        For each term** in abstract:
+            For each MeSH code associated with abstract:
+                Add the term to the associated vector
+
+    Normalize for IDF
+
+    Notes:
+        Term** = word, bigram, (maybe trigram?)
+        Get rid of stop words
+        The MeSH code is only up to the level we are training for (i.e. cut it off at the C04.588.XYZ)
+
+
+Word2Vec aka Word Embeddings
+
+    Uses not just exact word match, but also takes into account semantically similar words.
+    https://www.wikiwand.com/en/Word_embedding
+    https://www.tensorflow.org/tutorials/representation/word2vec
+
+    We need to find some pre-trained data most likely, but could also train it ourselves.
+
+
+Latent Dirichlet Allocation
+    
+    He brought this up as a potential idea as well, might be worth looking into?
