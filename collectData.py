@@ -10,7 +10,7 @@ from Bio import Entrez
 import random
 from random import shuffle
 import math
-
+import json
 
 # Uses good practices for retrieving large datasets
 # https://www.ncbi.nlm.nih.gov/books/NBK25498/#chapter3.Application_3_Retrieving_large
@@ -48,8 +48,8 @@ def read_ids(ids):
 
 if __name__ == '__main__':
     # Config variables
-    num_files = 10000
-    batch_amount = 500
+    num_files = 2
+    batch_amount = 1
     Entrez.email = 'your.email@example.com'
 
     #Initialize file to write article number, mesh codes, and abstract to test/training/dev files
@@ -73,6 +73,10 @@ if __name__ == '__main__':
 
     # Keep array of all mesh codes from corresponding articles
     meshList = []
+
+    # Get JSON of MeSH Tree #'s
+    with open("mesh.json", "r") as f:
+      meshTreeDict = json.load(f)
 
     for papers in batchedPapers:
         for i, paper in enumerate(papers['PubmedArticle']):
@@ -108,9 +112,15 @@ if __name__ == '__main__':
             #Append mesh dict to meshList
             meshList.append({pmid: meshDict})
 
+            # Convert MeSH Unique IDs to Tree Number
+
             # Add to mesh codes to output string
             meshString = ""
             for code in meshDict.keys():
+                # THIS IS WHERE YOU QUERY THE JSON FILE
+                #if meshDict[code] in meshTreeDict:
+                #  print meshDict[code]
+                #  print meshTreeDict[meshDict[code]] 
                 meshString += code + "\t"
 
             outputs.append(meshString + "\n" + abstract)
