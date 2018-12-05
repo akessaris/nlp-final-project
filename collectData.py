@@ -1,3 +1,4 @@
+#!/cygdrive/c/python27/python.exe
 # you need to install Biopython:
 # pip install biopython
 
@@ -62,7 +63,7 @@ if __name__ == '__main__':
     # Store outputs
     outputs = []
 
-    batchedResults = batched_search('skin cancer', num_files, batch_amount)
+    batchedResults = batched_search('cancer', num_files, batch_amount)
     batchedPapers = []
     for results in batchedResults:
         id_list = results['IdList']
@@ -94,7 +95,7 @@ if __name__ == '__main__':
             text = article['Abstract']['AbstractText']
             textList = []
             for i in text:
-              print (i)
+              # print (i)
               if i not in textList:
                 textList.append(i)
 
@@ -127,15 +128,24 @@ if __name__ == '__main__':
 
             # Convert MeSH Unique IDs to Tree Number
 
+            containsNeoplasmBySite = False
+
             # Add to mesh codes to output string
             meshString = ""
             for code in meshDict.keys():
                 # THIS IS WHERE YOU QUERY THE JSON FILE
-                #if meshDict[code] in meshTreeDict:
-                #  print meshDict[code]
-                #  print meshTreeDict[meshDict[code]] 
-                meshString += code + "\t"
+                if meshDict[code] in meshTreeDict:
+                    # print meshDict[code]
+                    # print meshTreeDict[meshDict[code]] 
+                    for treeCode in meshTreeDict[meshDict[code]]:
+                        # Make sure it has a C04.588 prefix
+                        if treeCode[0:7] == "C04.588":
+                            containsNeoplasmBySite = True
+                            meshString += treeCode + "\t"
+                # meshString += code + "\t"
 
+            if len(meshString) == 0 or not containsNeoplasmBySite:
+                continue
             outputs.append(meshString + "\n" + abstract)
       
     # Shuffle the list of outputs before writing to files
