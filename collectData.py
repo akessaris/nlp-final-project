@@ -10,7 +10,7 @@ from Bio import Entrez
 import random
 from random import shuffle
 import math
-
+import json
 
 # Uses good practices for retrieving large datasets
 # https://www.ncbi.nlm.nih.gov/books/NBK25498/#chapter3.Application_3_Retrieving_large
@@ -74,18 +74,35 @@ if __name__ == '__main__':
     # Keep array of all mesh codes from corresponding articles
     meshList = []
 
+    # Get JSON of MeSH Tree #'s
+    with open("mesh.json", "r") as f:
+      meshTreeDict = json.load(f)
+
     for papers in batchedPapers:
         for i, paper in enumerate(papers['PubmedArticle']):
             # Get PubMed ID of paper and article object
             pmid = int(str(paper['MedlineCitation']['PMID']))
             article = paper['MedlineCitation']['Article']
 
+            #print article['Abstract']['AbstractText']
+
             # If article doesn't have an abstract, don't process it
             if 'Abstract' not in article:
                 continue
 
-            # Get the abstract
-            abstract = article['Abstract']['AbstractText'][0]
+            # Get all available text from the article
+            text = article['Abstract']['AbstractText']
+            textList = []
+            for i in text:
+              print (i)
+              if i not in textList:
+                textList.append(i)
+
+            # Append all text to abstract
+            abstract = ""
+            for i in textList:
+              abstract += i
+
             abstract_dict[pmid] = abstract
 
             # Store dictionary of mesh codes for paper
@@ -108,9 +125,15 @@ if __name__ == '__main__':
             #Append mesh dict to meshList
             meshList.append({pmid: meshDict})
 
+            # Convert MeSH Unique IDs to Tree Number
+
             # Add to mesh codes to output string
             meshString = ""
             for code in meshDict.keys():
+                # THIS IS WHERE YOU QUERY THE JSON FILE
+                #if meshDict[code] in meshTreeDict:
+                #  print meshDict[code]
+                #  print meshTreeDict[meshDict[code]] 
                 meshString += code + "\t"
 
             outputs.append(meshString + "\n" + abstract)
