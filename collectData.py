@@ -48,8 +48,8 @@ def read_ids(ids):
 
 if __name__ == '__main__':
     # Config variables
-    num_files = 2
-    batch_amount = 1
+    num_files = 10000
+    batch_amount = 500
     Entrez.email = 'your.email@example.com'
 
     #Initialize file to write article number, mesh codes, and abstract to test/training/dev files
