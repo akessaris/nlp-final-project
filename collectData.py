@@ -84,12 +84,25 @@ if __name__ == '__main__':
             pmid = int(str(paper['MedlineCitation']['PMID']))
             article = paper['MedlineCitation']['Article']
 
+            #print article['Abstract']['AbstractText']
+
             # If article doesn't have an abstract, don't process it
             if 'Abstract' not in article:
                 continue
 
-            # Get the abstract
-            abstract = article['Abstract']['AbstractText'][0]
+            # Get all available text from the article
+            text = article['Abstract']['AbstractText']
+            textList = []
+            for i in text:
+              print (i)
+              if i not in textList:
+                textList.append(i)
+
+            # Append all text to abstract
+            abstract = ""
+            for i in textList:
+              abstract += i
+
             abstract_dict[pmid] = abstract
 
             # Store dictionary of mesh codes for paper
