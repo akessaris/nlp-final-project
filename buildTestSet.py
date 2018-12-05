@@ -33,7 +33,12 @@ def main():
 
         # Processing MeSH codes
         if currentMode == 'codes':
-            answersFile.write(line)
+            codes = line.split()
+            codestr = ""
+            for i in range(len(codes)):
+                code = codes[i]
+                codestr += code[0:11] + "\t"
+            answersFile.write(codestr + "\n")
             currentMode = 'abstract'
             continue
 
