@@ -13,6 +13,8 @@ from gensim.parsing.preprocessing import STOPWORDS
 from nltk.stem import WordNetLemmatizer, SnowballStemmer
 from nltk.stem.porter import *
 import numpy as np
+from sets import Set
+import Queue
 
 # import nltk
 # nltk.download('wordnet')
@@ -58,7 +60,7 @@ def main():
     abstractVectors = getTFIDFVector(abstractTerms,abstractTermFrequencyCount,totalAbstractCount)
     
 
-    numClosest = 3
+    numClosest = 1
 
     print "Finding best Mesh codes..."
     meshMatches = {}
@@ -76,12 +78,13 @@ def main():
 
         meshMatches[abstractNum] = sorted(meshMatches[abstractNum], key = itemgetter(1),reverse=True)
 
-        # Take the numClosest best mesh codes
-        # meshMatches[abstractNum] = meshMatches[abstractNum][0:numClosest]
 
-        # Get all with a similarity greater than cutoff
-        meshMatches[abstractNum] = getMeshWithCutoff(meshMatches[abstractNum],0.03)
-        # return
+        # Two options here:
+        # 1)  Take the numClosest best mesh codes
+        meshMatches[abstractNum] = meshMatches[abstractNum][0:numClosest]
+
+        # 2)  Get all with a similarity greater than cutoff
+        # meshMatches[abstractNum] = getMeshWithCutoff(meshMatches[abstractNum],0.03)
 
         meshList = [tup[0] for tup in meshMatches[abstractNum]]
 
@@ -90,23 +93,25 @@ def main():
 
 
 
-def getMeshWithCutoff(meshTuples, cutoff):
-    for i in range(len(meshTuples)):
-        meshTup = meshTuples[i]
-        # print meshTup
-        if meshTup[1] < cutoff:
-            if not i == 0:
-                return meshTuples[0:i]
-            else:
-                return meshTuples[0:1]
 
 
+
+#########################################
+#           MATH FUNCTIONS              #
+#########################################
+
+def getTFIDFVector(termDocumentCount, termFrequencyCount, totalDocuments):
+    vector = {}
+    for documentName in termDocumentCount:
+        vector[documentName] = {}
+        document = termDocumentCount[documentName]
+        for word in document:
+            vector[documentName][word] = TFIDF(document[word], termFrequencyCount[word],totalDocuments)
+    return vector
 
 # TODO: Play with normalizing termCount
 def TFIDF(termCount, documentFrequency, totalDocuments):
     return (termCount * math.log(totalDocuments/documentFrequency))
-
-
 
 def inverseCosine(abstractVector, queryVector):
     numerator = 0
@@ -124,16 +129,21 @@ def inverseCosine(abstractVector, queryVector):
     denominator = math.sqrt(querySum*abstractSum)
     return numerator / denominator
 
+def getMeshWithCutoff(meshTuples, cutoff):
+    for i in range(len(meshTuples)):
+        meshTup = meshTuples[i]
+        # print meshTup
+        if meshTup[1] < cutoff:
+            if not i == 0:
+                return meshTuples[0:i]
+            else:
+                return meshTuples[0:1]
 
-def getTFIDFVector(termDocumentCount, termFrequencyCount, totalDocuments):
-    vector = {}
-    for documentName in termDocumentCount:
-        vector[documentName] = {}
-        document = termDocumentCount[documentName]
-        for word in document:
-            vector[documentName][word] = TFIDF(document[word], termFrequencyCount[word],totalDocuments)
-    return vector
 
+
+#########################################
+#             PREPROCESSING             #
+#########################################
 
 # Trial preprocessing
 def lemmatize_stemming(text):
@@ -147,12 +157,20 @@ def preprocess(text):
             result.append(lemmatize_stemming(token))
     return result
 
-
+# disabled for now
 def clean(word):
-    word = word.lower()
-    word = word.replaceAll(r"([\W\d])+","")
     return word
+    # word = word.lower()
+    # word = word.replace(r"([\W\d])+","")
+    # return word
 
+
+
+
+
+#########################################
+#               PROCESSING              #
+#########################################
 
 # Returns a dictionary of the following form:
 """
@@ -162,7 +180,6 @@ def clean(word):
     "totalDocuments" : totalDocuments,            # number of mesh codes that showed up
 }
 """
-# TODO: Add n-grams
 def processTraining(file,stopWords):
     # stemmer = PorterStemmer()
 
@@ -179,7 +196,10 @@ def processTraining(file,stopWords):
 
     currentMode = 'num'
 
+    
+
     for line in file:
+
 
         # Starting a new abstract / Empty line case
         if len(line.split()) == 0:
@@ -194,30 +214,43 @@ def processTraining(file,stopWords):
         # Processing MeSH codes
         if currentMode == 'codes':
             currentCodes = line.split()
+            # usedCodes = {}
             for i in range(len(currentCodes)):
                 code = currentCodes[i]
                 currentCodes[i] =  code[0:11]
+            # remove duplicates
+            currentCodes = set(currentCodes)
             currentMode = 'abstract'
             continue
 
+        # No preprocessing currently, might be worth looking into!
         # words = preprocess(line)
-        # print abstract
-        # return
 
-        # # Handle abstracts
+        # Handle abstracts
         words = line.split()
 
-        # document = termDocumentCount[currentDocument]
+        bigram = ["",""]
+
+        replaceWordInBigram = 0
         for word in words:
+            word = clean(word)
             if word in stopWords:
                 continue
 
-            # breaks on Unicode
-            # word = stemmer.stem(word)
+            # Keep track of the previous words (done in this fashion so that we can easily implement trigrams if needed)
+            useWordInBigram = (replaceWordInBigram + 1) % 2
+            bigramWord = bigram[useWordInBigram] + " " + word
+            bigram[replaceWordInBigram] = word
+            replaceWordInBigram = useWordInBigram
+
+
 
 
             if word not in termFrequencyCount:
                 termFrequencyCount[word] = 0
+            if bigramWord not in termFrequencyCount:
+                termFrequencyCount[bigramWord] = 0
+
 
             for mesh in currentCodes:
 
@@ -235,7 +268,12 @@ def processTraining(file,stopWords):
                     # We keep track of how many different mesh codes the word shows up in
                     termFrequencyCount[word]+=1
 
+                if bigramWord not in document:
+                    document[bigramWord] = 0
+                    termFrequencyCount[bigramWord]+=1
+
                 document[word] += 1
+                document[bigramWord] += 1
 
 
     return {
@@ -257,22 +295,36 @@ def processDocuments(file,stopWords):
 
         termDocumentCount[currentDocument] = {}
         document = termDocumentCount[currentDocument]
+        replaceWordInBigram = 0
+        bigram = ["",""]
         for word in words:
+            word = clean(word)
             if word in stopWords:
                 continue
+            
+            # Keep track of the previous words (done in this fashion so that we can easily implement trigrams if needed)
+            useWordInBigram = (replaceWordInBigram + 1) % 2
+            bigramWord = bigram[useWordInBigram] + " " + word
+            bigram[replaceWordInBigram] = word
+            replaceWordInBigram = useWordInBigram
 
+            # init termfrequency
             if word not in termFrequencyCount:
                 termFrequencyCount[word] = 0
+            if bigramWord not in termFrequencyCount:
+                termFrequencyCount[bigramWord] = 0
 
-            # Breaks in unicode
-            # word = stemmer.stem(word)
-
+            # if a word has not shown up in this document before, increment termfrequencycount and init document
             if word not in document:
                 document[word] = 0
                 termFrequencyCount[word]+=1
-            
+            if bigramWord not in document:
+                document[bigramWord] = 0
+                termFrequencyCount[bigramWord]+=1
 
+            # finally, increment document count
             document[word] += 1
+            document[bigramWord]+=1
 
         totalDocuments += 1
         currentDocument += 1
