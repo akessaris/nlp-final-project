@@ -1,4 +1,5 @@
 import argparse
+from sets import Set
 def main():
 
     # Handle arguments
@@ -34,11 +35,10 @@ def main():
         # Processing MeSH codes
         if currentMode == 'codes':
             codes = line.split()
-            codestr = ""
             for i in range(len(codes)):
-                code = codes[i]
-                codestr += code[0:11] + "\t"
-            answersFile.write(codestr + "\n")
+                codes[i]=codes[i][0:11]
+            codes = Set(codes)
+            answersFile.write("\t".join(codes) + "\n")
             currentMode = 'abstract'
             continue
 
