@@ -66,7 +66,7 @@ def main():
     meshMatches = {}
 
     for abstractNum in abstractVectors:
-        # if abstractNum > 100:
+        # if abstractNum > 10:
         #     break
         # print abstractNum
 
@@ -81,10 +81,14 @@ def main():
 
         # Two options here:
         # 1)  Take the numClosest best mesh codes
-        meshMatches[abstractNum] = meshMatches[abstractNum][0:numClosest]
+        # meshMatches[abstractNum] = meshMatches[abstractNum][0:numClosest]
 
+        best = meshMatches[abstractNum][0][1]
+        cutoff = best - best*0.1
         # 2)  Get all with a similarity greater than cutoff
-        # meshMatches[abstractNum] = getMeshWithCutoff(meshMatches[abstractNum],0.03)
+        meshMatches[abstractNum] = getMeshWithCutoff(meshMatches[abstractNum],cutoff)
+
+        # print meshMatches[abstractNum]
 
         meshList = [tup[0] for tup in meshMatches[abstractNum]]
 
@@ -159,10 +163,10 @@ def preprocess(text):
 
 # disabled for now
 def clean(word):
-    return word
+    # return word
     # word = word.lower()
     # word = word.replace(r"([\W\d])+","")
-    # return word
+    return word
 
 
 
