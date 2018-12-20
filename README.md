@@ -12,6 +12,7 @@ Medical literature contains an abundance of useful information, but when it come
 We are using Biopython to extract the abstracts and MeSH codes of PubMed articles.
 
 * collectData.py
+  * Requires BioPython, run pip install biopython
   * Specify how many articles we want to be returned
   * Pass query to db
   * From each PubMed article:
@@ -31,6 +32,7 @@ We are using Biopython to extract the abstracts and MeSH codes of PubMed article
   * Run by python buildTestSet.py [dataFileName]
 
 * meshTFIDF.py
+  * Requires nltk and gensim, run pip install nltk and pip install gensim
   * Uses data found from collectData to train, and data.xxx.unlabeled from buildTestSet to test.
   * Builds a vector for each mesh code in training using TFIDF, words, and bigrams
   * Compares each document to each mesh code and sorts them based off likeliness
@@ -41,3 +43,6 @@ We are using Biopython to extract the abstracts and MeSH codes of PubMed article
 * score.py
   * Calculates average precision as well as f-measure
   * Run by python score.py [generatedMeshFileName] [answerMeshFileName]
+
+* findCutoff.py
+  * Calculates best cutoff percentage
