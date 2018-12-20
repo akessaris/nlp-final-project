@@ -27,6 +27,7 @@ def batched_search(query, num_files, batch_amount):
                                 term=query)
         results.append(Entrez.read(handle))
         num_processed += batch_amount
+        print num_processed
     return results
 
 # Gets the data for all ids in id_list, pre-batch beforehand!
@@ -49,7 +50,7 @@ def read_ids(ids):
 
 if __name__ == '__main__':
     # Config variables
-    num_files = 10000
+    num_files = 20000
     batch_amount = 500
     Entrez.email = 'your.email@example.com'
 

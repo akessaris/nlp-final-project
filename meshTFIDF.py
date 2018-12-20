@@ -82,17 +82,18 @@ def main():
         # Two options here:
         # 1)  Take the numClosest best mesh codes
         # meshMatches[abstractNum] = meshMatches[abstractNum][0:numClosest]
-
         best = meshMatches[abstractNum][0][1]
-        cutoff = best - best*0.1
+        cutoff = best - best*0.16
         # 2)  Get all with a similarity greater than cutoff
         meshMatches[abstractNum] = getMeshWithCutoff(meshMatches[abstractNum],cutoff)
 
-        # print meshMatches[abstractNum]
 
         meshList = [tup[0] for tup in meshMatches[abstractNum]]
 
-        outputFile.write(" ".join(meshList))
+        # This line was used when we wanted to find the best cutoff
+        # meshList = [tup[0] + "\t" + str(tup[1]) for tup in meshMatches[abstractNum]]
+
+        outputFile.write("\t".join(meshList))
         outputFile.write("\n")
 
 
