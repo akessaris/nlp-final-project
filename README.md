@@ -39,6 +39,5 @@ We are using Biopython to extract the abstracts and MeSH codes of PubMed article
   * Run by python meshTFIDF.py [trainingDataFileName] [unlabeledDataFileName]
 
 * score.py
-  * Currently only calculates average precision
-  * Will be used to calculate f-measure soon as well
+  * Calculates average precision as well as f-measure
   * Run by python score.py [generatedMeshFileName] [answerMeshFileName]
